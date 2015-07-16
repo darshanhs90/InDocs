@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<projectDescription>
+	<name>InDocs</name>
+	<comment></comment>
+	<projects>
+		<project>gemfire</project>
+		<project>gemfire-assembly</project>
+		<project>gemfire-core</project>
+		<project>gemfire-jgroups</project>
+		<project>gemfire-joptsimple</project>
+		<project>gemfire-json</project>
+		<project>gemfire-junit</project>
+		<project>gemfire-web</project>
+		<project>gemfire-web-api</project>
+	</projects>
+	<buildSpec>
+		<buildCommand>
+			<name>org.eclipse.jdt.core.javabuilder</name>
+			<arguments>
+			</arguments>
+		</buildCommand>
+	</buildSpec>
+	<natures>
+		<nature>org.eclipse.jdt.core.javanature</nature>
+	</natures>
+	<linkedResources>
+		<link>
+			<name>incubator-geode</name>
+			<type>2</type>
+			<location>/Users/hasudhakar/Desktop/node/Geode/incubator-geode</location>
+		</link>
+	</linkedResources>
+</projectDescription>
