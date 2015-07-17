@@ -64,9 +64,12 @@ public class myHTTPServer extends Thread {
 					outToClient.writeBytes("hello/////");
 					outToClient.close();
 				} else {
-					//This is interpreted as a file name
-					outToClient.writeBytes("{'asd':'def'}");
-					//outToClient.writeBytes("hello/////");
+					byte[] a=new byte[3];
+					a[0]=1;
+					a[1]=1;
+					a[2]=1;
+					
+					outToClient.writeBytes("{'asd':"+a+"}");
 					outToClient.close();
 				}
 			}
