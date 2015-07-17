@@ -26,10 +26,10 @@ public class myHTTPServer extends Thread {
 	Socket connectedClient = null;
 	BufferedReader inFromClient = null;
 	DataOutputStream outToClient = null;
-	ClientCache cache ;
+	static ClientCache cache ;
 	ServerSocket Server;
 	static int counter=1;
-	Region<String, byte[]> region;
+	static Region<String, byte[]> region;
 
 	public myHTTPServer(Socket client) {
 		connectedClient = client;
@@ -57,32 +57,44 @@ public class myHTTPServer extends Thread {
 			if (httpMethod.equals("GET")) {
 				if (httpQueryString.contains("/init")) {
 					initialise();
+					outToClient.writeBytes("Access-Control-Allow-Origin: *");
 					outToClient.writeBytes("asd");
 					outToClient.close();
 				} 
-				else if (httpQueryString.equals("/uploadFile")) {
+				else if (httpQueryString.contains("/uploadFile")) {
+					
 					System.out.println("uploadfile");
-					String substring=httpQueryString.substring(10);
-					String str[]=substring.split("<>?");
-					String filename=str[0];
+					String substring=httpQueryString.substring(11);
+					System.out.println(substring);
+					String str[]=substring.split("%3C%3E?");
+					String filename=str[1];
+					filename=filename.substring(1);
+					System.out.println(filename+"upload");
 					uploadFileToInmemoryDb(filename);
+					outToClient.writeBytes("Access-Control-Allow-Origin: *");
 					outToClient.writeBytes("uploaded successfully");
 					outToClient.close();
 				}
-				else if (httpQueryString.equals("/getFile")) {
+				else if (httpQueryString.contains("/getFile")) {
 					String substring=httpQueryString.substring(7);
-					String str[]=substring.split("<>?");
-					System.out.println(str[0]);
-					String resp=getFileFromInmemoryDb(str[1]);
+					String str[]=substring.split("%3C%3E?");
+					String filename=str[1];
+					filename=filename.substring(1);
+					System.out.println(filename+"file");
+					String resp=getFileFromInmemoryDb(filename);
+					outToClient.writeBytes("Access-Control-Allow-Origin: *");
 					outToClient.writeBytes(resp);
 					outToClient.close();
 				}
-				else if (httpQueryString.equals("/getDocs")) {
+				else if (httpQueryString.contains("/getDocs")) {
 					String substring=httpQueryString.substring(7);
-					String str[]=substring.split("<>?");
-					System.out.println(str[0]);
-					String resp=getDocsFromInmemoryDb(str[1]);
-					
+					String str[]=substring.split("%3C%3E?");
+					String filename=str[1];
+					filename=filename.substring(1);
+					System.out.println(filename+"docs");
+					String resp=getDocsFromInmemoryDb(filename);
+					System.out.println(resp);
+					outToClient.writeBytes("Access-Control-Allow-Origin: *");
 					outToClient.writeBytes(resp);
 					outToClient.close();
 				}
@@ -103,7 +115,14 @@ public class myHTTPServer extends Thread {
 
 		ServerSocket Server = new ServerSocket (5000, 10, InetAddress.getByName("127.0.0.1"));
 		System.out.println ("TCPServer Waiting for client on port 5000");
-
+		cache = new ClientCacheFactory()
+		.addPoolLocator("localhost", 10334)
+		.create();
+		region = cache
+				.<String, byte[]>createClientRegionFactory(ClientRegionShortcut.CACHING_PROXY)
+				.create("region");
+				System.out.println("initialised");
+				System.out.println(region);
 		while(true) {
 			Socket connected = Server.accept();
 			(new myHTTPServer(connected)).start();
@@ -112,28 +131,35 @@ public class myHTTPServer extends Thread {
 
 
 	public void initialise() throws FileNotFoundException{
-		cache = new ClientCacheFactory()
-		.addPoolLocator("localhost", 10334)
-		.create();
-
-		region = cache
-				.<String, byte[]>createClientRegionFactory(ClientRegionShortcut.CACHING_PROXY)
-				.create("region");
+//		cache = new ClientCacheFactory()
+//		.addPoolLocator("localhost", 10334)
+//		.create();
+//
+//		region = cache
+//				.<String, byte[]>createClientRegionFactory(ClientRegionShortcut.CACHING_PROXY)
+//				.create("region");
+//				System.out.println("initialised");
+//				System.out.println(region);
 	}
 	public void uploadFileToInmemoryDb(String filename) throws Exception{
 		File file = new File(filename);
 		FileInputStream fis = new FileInputStream(file);
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		System.out.println(filename);
 		byte[] buf = new byte[1024];
 		try {
 			for (int readNum; (readNum = fis.read(buf)) != -1;) {
 				bos.write(buf, 0, readNum); 
 			}
+			byte[] bytes = bos.toByteArray();
+			System.out.println(bytes.length);
+			System.out.println(filename);
+			System.out.println(region);
+			region.put(filename, bytes);
 		} catch (IOException ex) {
 			ex.printStackTrace();
 		}
-		byte[] bytes = bos.toByteArray();
-		region.put(filename, bytes);
+	
 	}
 	public String getFileFromInmemoryDb(String filename) throws Exception{
 		File someFile=null;
