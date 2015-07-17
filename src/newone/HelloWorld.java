@@ -34,18 +34,16 @@ public class HelloWorld {
 //					ex.printStackTrace();
 //				}
 //				byte[] bytes = bos.toByteArray();
-				region.put("3", "1");
-				region.put("4", "2");
-				region.put("3", "3");
-				
-				HelloWorld1.main(region);
-				cache.close();
+
 
 	}
-	public void uploadFileToDb(File file){
+	public void initialise(){
+		
+	}
+	public void uploadFileToInmemoryDb(File file){
 
 	}
-	public File getFileFromDb(File file){
+	public File getFileFromInmemoryDb(File file){
 		
 		return null;
 	}
