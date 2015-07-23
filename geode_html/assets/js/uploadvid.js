@@ -3,6 +3,7 @@ app.controller('myCtrl',function($scope,$http) {
 
 
 
+
 $scope.upload=function(){
 	alert('upload');
 	var fullPath = document.getElementById('upload');
@@ -12,8 +13,9 @@ if (fullPath!=null) {
 	var filename = fullPath.substring(startIndex);
 	if (filename.indexOf('\\') === 0 || filename.indexOf('/') === 0) {
 		filename = filename.substring(1);		
+			check=1;
 		$http({
-    url: 'http://localhost:5000/uploadFile'+"<>?"+filename, 
+    url: 'http://localhost:5000/uploadFile'+"<>?"+filename+"<>?"+check, 
     method: "GET"
  }).success(function(data, status, headers, config) {
  	var res=(data);
@@ -25,7 +27,7 @@ else{
 	filename="vid.mov";
 	alert(filename);
 	$http({
-    url: 'http://localhost:5000/uploadFile'+"<>?"+filename, 
+    url: 'http://localhost:5000/uploadFile'+"<>?"+filename+"<>?"+1, 
     method: "GET"
  }).success(function(data, status, headers, config) {
  	var res=(data);

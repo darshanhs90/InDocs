@@ -30,7 +30,7 @@ public class myHTTPServer extends Thread {
 	ServerSocket Server;
 	static int counter=1;
 	static Region<String, byte[]> region;
-
+	static Region<String, byte[]> region1;
 	public myHTTPServer(Socket client) {
 		connectedClient = client;
 	}
@@ -62,15 +62,21 @@ public class myHTTPServer extends Thread {
 					outToClient.close();
 				} 
 				else if (httpQueryString.contains("/uploadFile")) {
-					
+
 					System.out.println("uploadfile");
 					String substring=httpQueryString.substring(11);
 					System.out.println(substring);
 					String str[]=substring.split("%3C%3E?");
 					String filename=str[1];
+					String checker=str[2];
 					filename=filename.substring(1);
 					System.out.println(filename+"upload");
 					uploadFileToInmemoryDb(filename);
+					System.out.println(checker);
+					if(checker.equals("?0"))//not favourite
+					{
+						uploadFileToInmemoryDb1(filename);
+					}
 					outToClient.writeBytes("Access-Control-Allow-Origin: *");
 					outToClient.writeBytes("uploaded successfully");
 					outToClient.close();
@@ -123,23 +129,29 @@ public class myHTTPServer extends Thread {
 				.create("region");
 				System.out.println("initialised");
 				System.out.println(region);
-		while(true) {
-			Socket connected = Server.accept();
-			(new myHTTPServer(connected)).start();
-		}
+				region1 = cache
+						.<String, byte[]>createClientRegionFactory(ClientRegionShortcut.CACHING_PROXY)
+						.create("region1");
+						System.out.println("initialised1");
+						System.out.println(region1);
+
+						while(true) {
+							Socket connected = Server.accept();
+							(new myHTTPServer(connected)).start();
+						}
 	}
 
 
 	public void initialise() throws FileNotFoundException{
-//		cache = new ClientCacheFactory()
-//		.addPoolLocator("localhost", 10334)
-//		.create();
-//
-//		region = cache
-//				.<String, byte[]>createClientRegionFactory(ClientRegionShortcut.CACHING_PROXY)
-//				.create("region");
-//				System.out.println("initialised");
-//				System.out.println(region);
+		//		cache = new ClientCacheFactory()
+		//		.addPoolLocator("localhost", 10334)
+		//		.create();
+		//
+		//		region = cache
+		//				.<String, byte[]>createClientRegionFactory(ClientRegionShortcut.CACHING_PROXY)
+		//				.create("region");
+		//				System.out.println("initialised");
+		//				System.out.println(region);
 	}
 	public void uploadFileToInmemoryDb(String filename) throws Exception{
 		File file = new File(filename);
@@ -159,7 +171,27 @@ public class myHTTPServer extends Thread {
 		} catch (IOException ex) {
 			ex.printStackTrace();
 		}
-	
+
+	}
+	public void uploadFileToInmemoryDb1(String filename) throws Exception{
+		File file = new File(filename);
+		FileInputStream fis = new FileInputStream(file);
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		System.out.println(filename);
+		byte[] buf = new byte[1024];
+		try {
+			for (int readNum; (readNum = fis.read(buf)) != -1;) {
+				bos.write(buf, 0, readNum); 
+			}
+			byte[] bytes = bos.toByteArray();
+			System.out.println(bytes.length);
+			System.out.println(filename);
+			System.out.println(region1);
+			region1.put(filename, bytes);
+		} catch (IOException ex) {
+			ex.printStackTrace();
+		}
+
 	}
 	public String getFileFromInmemoryDb(String filename) throws Exception{
 		File someFile=null;
@@ -179,8 +211,8 @@ public class myHTTPServer extends Thread {
 		return name;
 	}
 
-	
-	
+
+
 	public String getDocsFromInmemoryDb(String filetype) throws Exception{
 		File someFile=null;
 		String str="filename";

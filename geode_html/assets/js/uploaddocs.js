@@ -1,7 +1,8 @@
 var app=angular.module('myApp',[]);
 app.controller('myCtrl',function($scope,$http) {
 
-
+	$scope.checker1=false;
+	$scope.checker2=false;
 
 
 
@@ -15,8 +16,11 @@ if (fullPath) {
 	var filename = fullPath.substring(startIndex);
 	if (filename.indexOf('\\') === 0 || filename.indexOf('/') === 0) {
 		filename = filename.substring(1);
+				var check=0;
+		if($scope.checker1==true)
+			check=1;
 		$http({
-    url: 'http://localhost:5000/uploadFile'+"<>?"+filename, 
+    url: 'http://localhost:5000/uploadFile'+"<>?"+filename+"<>?"+check, 
     method: "GET"
  }).success(function(data, status, headers, config) {
  	var res=(data);
